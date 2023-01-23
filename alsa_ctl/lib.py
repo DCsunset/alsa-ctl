@@ -19,8 +19,21 @@ import re
 VOLUME_TYPES = ("Playback", "Capture")
 
 global_options = {
-	"card": ""	# Empty means using the default card 0
+	# None means using the default card
+	"card": None,
+	# Possible scontrols used to change volume
+	"volume_scontrols": ["Master", "Headset", "Capture", "PCM"]
 }
+
+def run_command(cmd: list[str]) -> str:
+	return subprocess.check_output(cmd).decode(sys.stdout.encoding)
+
+# Build card options
+def card_options(card: str | None):
+	options = []
+	if card is not None:
+		options.extend(["-c", card])
+	return options
 
 # List all sound cards
 # max_num <= 0 means no limit
@@ -37,15 +50,13 @@ def list_cards(max_num: int = 0) -> list[str]:
 	return cards
    
 # Get scontrols of a sound card
-def get_amixer_scontrols(card: str) -> list[str]:
+def get_scontrols(card: str | None) -> list[str]:
 	try:
-		res = subprocess.run(["amixer", "-c", card, "scontrols"], capture_output=True)
-		if res.returncode != 0:
-			return []
-			
-		names = []
-		lines = res.stdout.decode("utf-8").splitlines()
+		out = run_command(["amixer", *card_options(card), "scontrols"])
+
+		lines = out.splitlines()
 		p = re.compile(r"'(.+)'")
+		names = []
 		for l in lines:
 			# find the last occurrence of the quoted name
 			name = p.search(l).groups()[-1]
@@ -58,18 +69,15 @@ def get_amixer_scontrols(card: str) -> list[str]:
 	return []
 
 # Get volume types of a specific scontrol (check for Playback and Capture)
-def get_scontrol_volume_types(card: str, scontrol: str) -> list[str]:
+def get_scontrol_volume_types(card: str | None, scontrol: str) -> list[str]:
 	try:
-		res = subprocess.run(["amixer", "-c", card, "sget", scontrol], capture_output=True)
-		if res.returncode != 0:
-			return []
+		out = run_command(["amixer", *card_options(card), "sget", scontrol])
 			
 		types = []
 		for volume_type in VOLUME_TYPES:
 			regex = re.compile(f"{volume_type}.*\\[\\d?\\d?\\d%\\]")
-			output = res.stdout.decode("utf-8")
 			# find the last occurrence of the quoted name
-			if len(regex.findall(output)) > 0:
+			if len(regex.findall(out)) > 0:
 				types.append(volume_type)
 		return types
 	except Exception as e:
@@ -80,35 +88,37 @@ def get_scontrol_volume_types(card: str, scontrol: str) -> list[str]:
 
 	
 # Get current volume scontrol and card for amixer
-def get_current_control(volume_type: str) -> tuple[str, str]:
-	## TODO: fix this
-	card = get_jack_card()
-	scontrols = get_amixer_scontrols(card)
+def get_volume_scontrol(card: str | None, volume_type: str) -> str:
+	scontrols = get_scontrols(card)
 
 	# possible scontrols for volume
-	amixer_volume_scontrols = ["Master", "Headset", "Capture"]
-	for sc in amixer_volume_scontrols:
+	for sc in global_options["volume_scontrols"]:
 		if sc in scontrols:
 			types = get_scontrol_volume_types(card, sc)
 			if volume_type in types:
-				return card, sc
+				return sc
 	
-	print(f"No suitable amixer volume control for card {card}", file=sys.stderr)
-	return card, ""
+	print(f"No suitable amixer volume control", file=sys.stderr)
+	return ""
 
-def get_volume_cmd(volume_type: str) -> str:
-	card, scontrol = get_current_control(volume_type)
-	return f"amixer -c '{card}' sget '{scontrol}'"
+def get_volume_cmd(volume_type: str) -> list[str]:
+	card = global_options["card"]
+	scontrol = get_volume_scontrol(card, volume_type)
+	print(scontrol)
+	return ["amixer", *card_options(card), "sget", scontrol]
 
-def toggle_cmd(volume_type: str) -> str:
-	card, scontrol = get_current_control(volume_type)
-	return f"amixer -c '{card}' sset '{scontrol}' '{volume_type}' toggle"
+def toggle_cmd(volume_type: str) -> list[str]:
+	card = global_options["card"]
+	scontrol = get_volume_scontrol(card, volume_type)
+	return ["amixer", *card_options(card), "sset", scontrol, volume_type, "toggle"]
 
-def lower_volume_cmd(volume_type: str, step: int) -> str:
-	card, scontrol = get_current_control(volume_type)
-	return f"amixer -c '{card}' sset '{scontrol}' '{volume_type}' {step}-"
+def lower_volume_cmd(volume_type: str, step: int) -> list[str]:
+	card = global_options["card"]
+	scontrol = get_volume_scontrol(card, volume_type)
+	return ["amixer", *card_options(card), "sset", scontrol, volume_type, f"{step}-"]
 
-def raise_volume_cmd(volume_type: str, step: int) -> str:
-	card, scontrol = get_current_control(volume_type)
-	return f"amixer -c '{card}' sset '{scontrol}' '{volume_type}' {step}+"
+def raise_volume_cmd(volume_type: str, step: int) -> list[str]:
+	card = global_options["card"]
+	scontrol = get_volume_scontrol(card, volume_type)
+	return ["amixer", *card_options(card), "sset", scontrol, volume_type, f"{step}+"]
 

@@ -19,27 +19,18 @@ import subprocess
 import argparse
 import importlib.resources as pkg_resources
 from ._version import __version__
-from .lib import get_volume_cmd, toggle_cmd, raise_volume_cmd, lower_volume_cmd, list_cards, VOLUME_TYPES, global_options
+from .lib import get_volume_cmd, toggle_cmd, raise_volume_cmd, lower_volume_cmd, list_cards, VOLUME_TYPES, global_options, run_command
 
 def error(msg: str):
 	print(msg, file=sys.stderr)
 	sys.exit(1)
-	
-def run_cmd(cmd: list[str] | str):
-	if isinstance(cmd, list):
-		for c in cmd:
-			subprocess.run(c, shell=True)
-	else:
-		subprocess.run(cmd, shell=True)
-
 
 def get_volume(volume_type: str):
 	if volume_type not in VOLUME_TYPES:
 		error(f"Invalid volume type: {volume_type}")
 
-	res = subprocess.run(get_volume_cmd(volume_type), shell=True, capture_output=True)
-	out = res.stdout.decode("utf-8")
-	# filter capture volume
+	out = run_command(get_volume_cmd(volume_type))
+	# filter volume of different volume types
 	regex = re.compile(f"{volume_type}.*\\[\\d?\\d?\\d%\\]")
 	print("\n".join(
 		map(
@@ -61,7 +52,8 @@ def main():
 		description="Control audio with ALSA API easily via CLI",
 		**global_config
 	)
-	parser.add_argument("-c", "--card", default="", help="Control a specific sound card (empty means using the current card)")
+	parser.add_argument("-c", "--card", help="Control a specific sound card (using the default card if not specified)")
+	parser.add_argument("--vs", "--volume-scontrols", action="append", help='Possible scontrols used to change volume. Default: ["Master", "Headset", "Capture", "PCM"]')
 	parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 	
 	# For commands
@@ -177,29 +169,34 @@ def main():
 	args = parser.parse_args()
 	cmd = args.command
 	global_options["card"] = args.card
+	if args.vs is not None:
+		global_options["volume_scontrols"] = args.vs
 
-	if cmd == "list_cards":
-		print("\n".join(list_cards(args.max_num)))
-	elif cmd == "get_volume":
-		get_volume(args.volume_type)
-	elif cmd == "toggle":
-		run_cmd(toggle_cmd(args.volume_type))
-	elif cmd == "raise_volume":
-		run_cmd(raise_volume_cmd(args.volume_type, args.step))
-	elif cmd == "lower_volume":
-		run_cmd(lower_volume_cmd(args.volume_type, args.step))
-	elif cmd == "completion":
-		# resources must be included in package_data in setup.py
-		if args.shell == "zsh":
-			filename = "_alsa-ctl"
-		else:
-			error(f"Shell {args.shell} not supported")
+	try:
+		if cmd == "list_cards":
+			print("\n".join(list_cards(args.max_num)))
+		elif cmd == "get_volume":
+			get_volume(args.volume_type)
+		elif cmd == "toggle":
+			run_command(toggle_cmd(args.volume_type))
+		elif cmd == "raise_volume":
+			run_command(raise_volume_cmd(args.volume_type, args.step))
+		elif cmd == "lower_volume":
+			run_command(lower_volume_cmd(args.volume_type, args.step))
+		elif cmd == "completion":
+			# resources must be included in package_data in setup.py
+			if args.shell == "zsh":
+				filename = "_alsa-ctl"
+			else:
+				error(f"Shell {args.shell} not supported")
 
-		data = pkg_resources.read_text("alsa_ctl.completion", filename)
-		dst = Path(args.directory).joinpath(filename)
-		with open(dst, "w+") as f:
-			f.write(data)
-		print(f"Completion script installed at {dst}")
+			data = pkg_resources.read_text("alsa_ctl.completion", filename)
+			dst = Path(args.directory).joinpath(filename)
+			with open(dst, "w+") as f:
+				f.write(data)
+			print(f"Completion script installed at {dst}")
+	except Exception as e:
+		error("Error executing command")
 
 if __name__ == "__main__":
 	main()
