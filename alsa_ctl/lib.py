@@ -104,7 +104,6 @@ def get_volume_scontrol(card: str | None, volume_type: str) -> str:
 def get_volume_cmd(volume_type: str) -> list[str]:
 	card = global_options["card"]
 	scontrol = get_volume_scontrol(card, volume_type)
-	print(scontrol)
 	return ["amixer", *card_options(card), "sget", scontrol]
 
 def toggle_cmd(volume_type: str) -> list[str]:
