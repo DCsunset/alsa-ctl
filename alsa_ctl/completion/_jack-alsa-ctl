@@ -1,0 +1,105 @@
+#compdef alsa-ctl
+#
+# alsa-ctl
+# Copyright (C) 2022-2023 DCsunset
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+_alsa-ctl() {
+	# zsh internal variables
+	local line state
+
+	# set state using ->value
+	# 1 used to describe the first arg (program itself)
+	_arguments -C \
+		{-c,--card}"[control a specific sound card]: :($(alsa-ctl list_cards))" \
+		"(- *)"{-h,--help}"[show help message]" \
+		"(- *)"{-v,--version}"[show version]" \
+		":: :_alsa-ctl_commands" \
+		"*:: :->arg"
+	
+	case "$state" in
+		arg)
+			local commands=(
+				"list_cards"
+				"get_card"
+				"set_card"
+				"get_volume"
+				"toggle"
+				"raise_volume"
+				"lower_volume"
+				"completion"
+			)
+			
+			# call complete functions if it's a valid command
+			if (( $commands[(Ie)$line[1]] )); then
+				_alsa-ctl_$line[1]
+			fi
+	esac
+}
+
+volume_types=(Playback Capture)
+
+_alsa-ctl_commands() {
+	local commands=(
+		"list_cards:list available sound cards"
+		"get_volume:get current volume"
+		"toggle:toggle (mute/unmute)"
+		"raise_volume:raise volume"
+		"lower_volume:lower volume"
+		"completion:install completion script"
+	)
+
+	_describe "alsa-ctl commands" commands "$@"
+}
+
+_alsa-ctl_list_cards() {
+	_arguments \
+		"(- *)"{-h,--help}"[show command help]" \
+		":max_num:"
+}
+
+_alsa-ctl_get_volume() {
+	_arguments \
+		"(- *)"{-h,--help}"[show command help]" \
+		":volume_type:($volume_types)"
+}
+
+_alsa-ctl_toggle() {
+	_arguments \
+		"(- *)"{-h,--help}"[show command help]" \
+		":volume_type:($volume_types)"
+}
+
+_alsa-ctl_raise_volume() {
+	_arguments \
+		"(- *)"{-h,--help}"[show command help]" \
+		{-s,--step}"[step]:" \
+		":volume_type:($volume_types)"
+}
+
+_alsa-ctl_lower_volume() {
+	_arguments \
+		"(- *)"{-h,--help}"[show command help]" \
+		{-s,--step}"[step]:" \
+		":volume_type:($volume_types)"
+}
+
+_alsa-ctl_completion() {
+	_arguments \
+		"(- *)"{-h,--help}"[show command help]" \
+		"--shell[shell type]: :(zsh)" \
+		":directory:_directories"
+}
+
+_alsa-ctl
