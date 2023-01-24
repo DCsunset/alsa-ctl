@@ -9,7 +9,14 @@ function writeVersion(contents, version) {
 	return contents.replace(re, `__version__ = "${version}"`);
 }
 
+const tracker = {
+	filename: "alsa_ctl/_version.py",
+	updater: {
+		readVersion,
+		writeVersion
+	}
+};
+
 module.exports = {
-	readVersion,
-	writeVersion
+	packageFiles: [tracker]
 };
