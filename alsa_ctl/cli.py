@@ -53,7 +53,7 @@ def main():
 		**global_config
 	)
 	parser.add_argument("-c", "--card", help="Control a specific sound card (using the default card if not specified)")
-	parser.add_argument("--vs", "--volume-scontrols", action="append", help='Possible scontrols used to change volume. Default: ["Master", "Headset", "Capture", "PCM"]')
+	parser.add_argument("--vs", "--volume-scontrols", action="append", help='Possible scontrols used to change volume. If not set, use ["Master", "Headset", "Capture", "PCM"]')
 	parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 	
 	# For commands
