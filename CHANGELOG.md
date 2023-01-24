@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.2](https://github.com/DCsunset/alsa-ctl/compare/v0.1.1...v0.1.2) (2023-01-24)
+
+
+### Bug Fixes
+
+* fix volume changing commands ([117108d](https://github.com/DCsunset/alsa-ctl/commit/117108dff63f3068a0f42133b4b8d87a9a824eda))
+
 ## [0.1.1](https://github.com/DCsunset/alsa-ctl/compare/v0.1.0...v0.1.1) (2023-01-24)
 
 ## 0.1.0 (2023-01-24)
