@@ -52,8 +52,8 @@ def main():
 		description="Control audio with ALSA API easily via CLI",
 		**global_config
 	)
-	parser.add_argument("-c", "--card", help="Control a specific sound card (using the default card if not specified)")
-	parser.add_argument("--vs", "--volume-scontrols", action="append", help='Possible scontrols used to change volume. If not set, use ["Master", "Headset", "Capture", "PCM"]')
+	parser.add_argument("-c", "--card", help="control a specific sound card (using the default card if not specified)")
+	parser.add_argument("--vs", "--volume-scontrols", action="append", help='possible scontrols used to change volume. If not set, use ["Master", "Headset", "Capture", "PCM"]')
 	parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 	
 	# For commands

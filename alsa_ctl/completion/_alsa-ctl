@@ -23,6 +23,7 @@ _alsa-ctl() {
 	# 1 used to describe the first arg (program itself)
 	_arguments -C \
 		{-c,--card}"[control a specific sound card]: :($(alsa-ctl list_cards))" \
+		{--vs,--volume-scontrols}"[possible scontrols used to change volume]:" \
 		"(- *)"{-h,--help}"[show help message]" \
 		"(- *)"{-v,--version}"[show version]" \
 		":: :_alsa-ctl_commands" \
@@ -32,8 +33,6 @@ _alsa-ctl() {
 		arg)
 			local commands=(
 				"list_cards"
-				"get_card"
-				"set_card"
 				"get_volume"
 				"toggle"
 				"raise_volume"
