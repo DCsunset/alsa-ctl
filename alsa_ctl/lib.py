@@ -114,10 +114,10 @@ def toggle_cmd(volume_type: str) -> list[str]:
 def lower_volume_cmd(volume_type: str, step: int) -> list[str]:
 	card = global_options["card"]
 	scontrol = get_volume_scontrol(card, volume_type)
-	return ["amixer", *card_options(card), "sset", scontrol, volume_type, f"{step}-"]
+	return ["amixer", *card_options(card), "sset", scontrol, volume_type, f"{step}%-"]
 
 def raise_volume_cmd(volume_type: str, step: int) -> list[str]:
 	card = global_options["card"]
 	scontrol = get_volume_scontrol(card, volume_type)
-	return ["amixer", *card_options(card), "sset", scontrol, volume_type, f"{step}+"]
+	return ["amixer", *card_options(card), "sset", scontrol, volume_type, f"{step}%+"]
 

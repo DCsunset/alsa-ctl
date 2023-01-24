@@ -124,7 +124,7 @@ def main():
 		"--step",
 		default=2,
 		type=int,
-		help="raise volume by a value",
+		help="raise volume by a percentage"
 	)
 	# lower_volume
 	lower_volume_parser = sub_parser.add_parser(
@@ -145,7 +145,7 @@ def main():
 		"--step",
 		default=2,
 		type=int,
-		help="lower volume by a value"
+		help="lower volume by a percentage"
 	)
 	# completion
 	completion_parser = sub_parser.add_parser(
