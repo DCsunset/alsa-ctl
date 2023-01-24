@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.3](https://github.com/DCsunset/alsa-ctl/compare/v0.1.2...v0.1.3) (2023-01-24)
+
+
+### Bug Fixes
+
+* fix zsh completion ([0c99ad5](https://github.com/DCsunset/alsa-ctl/commit/0c99ad552adac734d68c2628dcb862444b04dfc8))
+
 ## [0.1.2](https://github.com/DCsunset/alsa-ctl/compare/v0.1.1...v0.1.2) (2023-01-24)
 
 
