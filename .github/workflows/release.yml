@@ -1,5 +1,8 @@
 name: Release
 
+permissions:
+  contents: write
+  
 on:
   push:
     tags:
@@ -37,4 +40,3 @@ jobs:
       
       - name: Release
         uses: softprops/action-gh-release@v1
-        
