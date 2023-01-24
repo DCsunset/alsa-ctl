@@ -1,7 +1,7 @@
-const re = /^__version__ = "(\d\.\d\.\d)"/gm;
+const re = /^__version__ = "(\d\.\d\.\d)"/;
 
 function readVersion(contents) {
-	const matches = re.exec(contents);
+	const matches = contents.match(re);
 	return matches[1];
 }
 
@@ -18,5 +18,8 @@ const tracker = {
 };
 
 module.exports = {
-	packageFiles: [tracker]
+	// read version
+	packageFiles: [tracker],
+	// write version
+	bumpFiles: [tracker]
 };
